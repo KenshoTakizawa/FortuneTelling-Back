@@ -2,20 +2,20 @@
 
 namespace App\Models;
 
-use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Date;
 use Laravel\Sanctum\HasApiTokens;
 
-class User extends Authenticatable implements MustVerifyEmail
+class UserProfile extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable;
 
-    public string $name;
+    protected $dates = ['birthday'];
 
-    public string $email;
+    public int $user_id;
 
     /**
      * The attributes that are mass assignable.
@@ -23,9 +23,11 @@ class User extends Authenticatable implements MustVerifyEmail
      * @var array<int, string>
      */
     protected $fillable = [
-        'name',
-        'email',
-        'password',
+        'age',
+        'sex',
+        'blood_type',
+        'birthday',
+        'user_id',
     ];
 
     /**
@@ -34,8 +36,6 @@ class User extends Authenticatable implements MustVerifyEmail
      * @var array<int, string>
      */
     protected $hidden = [
-        'password',
-        'remember_token',
     ];
 
     /**
@@ -44,12 +44,22 @@ class User extends Authenticatable implements MustVerifyEmail
      * @var array<string, string>
      */
     protected $casts = [
-        'email_verified_at' => 'datetime',
-        'password' => 'hashed',
+        'age' => 'integer',
+        'sex' => 'integer',
+        'blood_type' => 'string',
     ];
 
-    public function userProfile(): HasOne
+    public function user(): BelongsTo
     {
-        return $this->hasOne(UserProfile::class);
+        return $this->belongsTo(User::class);
+    }
+
+    /**
+     * @param  int|string  $userId
+     * @return bool
+     */
+    public static function existsForUserId($userId): bool
+    {
+        return static::where('user_id', $userId)->exists();
     }
 }
